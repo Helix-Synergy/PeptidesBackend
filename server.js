@@ -31,6 +31,8 @@ app.use('/api/register-student', studentRoutes);
 app.use('/api/register-faculty', facultyRoutes);
 app.use('/api/become-member', memberRoutes);
 app.use('/api', collaborateRoute);
+app.get("/", (req, res) => res.send("Backend is alive!"));
+
 
 // Start the server
 app.listen(PORT, () => {
