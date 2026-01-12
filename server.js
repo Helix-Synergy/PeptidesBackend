@@ -1,4 +1,8 @@
 require('dotenv').config();
+const { verifyConnection } = require('./utils/emailSender');
+
+// Verify email connection on startup
+verifyConnection();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
