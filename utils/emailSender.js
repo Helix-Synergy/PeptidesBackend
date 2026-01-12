@@ -48,20 +48,45 @@
 // emailsender.js
 const nodemailer = require("nodemailer");
 
-// Configure Nodemailer transporter using Hostinger SMTP
+// Log the config being used (masking password)
+console.log("📧 Configuring Nodemailer with:", {
+  host: process.env.SMTP_HOST_INFO,
+  port: process.env.SMTP_PORT_INFO,
+  secure: process.env.SMTP_SECURE_INFO,
+  user: process.env.EMAIL_USER_INFO,
+});
+
+// Configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST_INFO,            // smtp.hostinger.com
-  port: parseInt(process.env.SMTP_PORT_INFO),  // 465 (SSL) or 587 (TLS)
-  secure: process.env.SMTP_SECURE_INFO === 'true', // true for SSL (465), false for TLS (587)
+  host: process.env.SMTP_HOST_INFO,            
+  port: parseInt(process.env.SMTP_PORT_INFO),  
+  secure: process.env.SMTP_SECURE_INFO === 'true', 
   auth: {
-    user: process.env.EMAIL_USER_INFO,         // hello@peptides.co.in
-    pass: process.env.EMAIL_PASS_INFO,         // mailbox password
+    user: process.env.EMAIL_USER_INFO,         
+    pass: process.env.EMAIL_PASS_INFO,         
   },
   tls: {
-    rejectUnauthorized: false, // avoids certificate issues
+    rejectUnauthorized: false, 
   },
-  connectionTimeout: 30000,     // 30s max before failing
+  connectionTimeout: 10000, // Reduced to 10s for faster feedback
+  debug: true, // Enable debug output
+  logger: true // Log to console
 });
+
+/**
+ * Verifies the SMTP connection.
+ */
+const verifyConnection = async () => {
+    try {
+        console.log("⏳ Verifying SMTP Connection...");
+        await transporter.verify();
+        console.log("✅ SMTP Connection established successfully!");
+        return true;
+    } catch (error) {
+        console.error("❌ SMTP Connection Failed:", error);
+        return false;
+    }
+};
 
 /**
  * Sends an email with optional attachments.
@@ -89,4 +114,4 @@ const sendEmail = async (to, subject, htmlContent, attachments = []) => {
   }
 };
 
-module.exports = { sendEmail };
+module.exports = { sendEmail, verifyConnection };
