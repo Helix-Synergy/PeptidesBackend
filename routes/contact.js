@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
+const multer = require('multer');
+const upload = multer();
 const { sendEmail } = require('../utils/emailSender');
 const { ownerTemplate, confirmationTemplate } = require('../utils/emailTemplates');
 const { Contact } = require('../models/FormSchemas');
@@ -17,7 +19,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', upload.none(), async (req, res) => {
     try {
         // Debug log – see exactly what frontend sends
         // console.log("📩 Received contact form data:", req.body);
