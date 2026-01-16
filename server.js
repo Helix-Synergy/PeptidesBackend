@@ -1,4 +1,12 @@
 require('dotenv').config();
+const { verifyConnection } = require('./utils/emailSender');
+const connectDB = require('./config/db');
+
+// Connect to Database
+connectDB();
+
+// Verify email connection on startup
+verifyConnection();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -24,6 +32,9 @@ if (!fs.existsSync(uploadDir)) {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Route handlers for each form
 app.use('/api/contact', contactRoutes);
