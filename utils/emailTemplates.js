@@ -127,11 +127,15 @@ const paymentReceiptTemplate = (paymentDetails) => {
         invoiceNo,
         date,
         recipientName,
-        recipientAddress, // Optional, can be empty
+        recipientAddress,
         itemDescription,
         amount,
-        paymentId
+        paymentId,
+        record // Full record object
     } = paymentDetails;
+
+    // Helper to safely get field
+    const getField = (val) => val || '-';
 
     return `
         <!DOCTYPE html>
@@ -141,156 +145,73 @@ const paymentReceiptTemplate = (paymentDetails) => {
             <title>Payment Receipt</title>
             <style>
                 body {
-                    font-family: 'Times New Roman', Times, serif; /* Matching the formal look */
+                    font-family: 'Times New Roman', Times, serif;
                     color: #000;
                     background-color: #fff;
                     margin: 0;
                     padding: 0;
                     line-height: 1.4;
+                    -webkit-print-color-adjust: exact;
                 }
                 .container {
                     max-width: 800px;
                     margin: 20px auto;
                     background: #fff;
                     padding: 40px;
-                    border: 1px solid #ddd; /* Optional border for email view */
+                    border: 1px solid #ddd;
                 }
-                .header-top-bar {
-                    height: 10px;
-                    background-color: #8B6914; /* Brownish Gold color from image */
-                    margin-bottom: 20px;
-                }
-                .header-logo-section {
-                    display: table;
-                    width: 100%;
-                    margin-bottom: 20px;
-                    border-bottom: 2px solid #000;
-                    padding-bottom: 15px;
-                }
-                .logo-col {
-                    display: table-cell;
-                    width: 30%;
-                    vertical-align: top;
-                    text-align: left;
-                }
-                .logo-img {
-                    max-width: 120px;
-                    display: block;
-                }
-                .logo-text {
-                    font-size: 18px;
-                    font-weight: bold;
-                    color: #8B6914;
-                    margin-top: 5px;
-                    letter-spacing: 1px;
-                }
-                .logo-subtext {
-                    font-size: 10px;
-                    text-transform: uppercase;
-                    color: #555;
-                }
-                .company-info-col {
-                    display: table-cell;
-                    width: 70%;
-                    vertical-align: top;
-                    text-align: right;
-                    font-size: 13px;
-                }
-                .company-info-item {
-                    margin-bottom: 3px;
-                    display: block;
-                }
-                .icon {
-                    color: #8B6914;
-                    margin-right: 5px;
-                    font-weight: bold;
+                /* Print styles */
+                @media print {
+                    body { background-color: #fff; }
+                    .container { margin: 0; padding: 20px; border: none; max-width: 100%; width: 100%; }
+                    .no-print { display: none; }
                 }
                 
-                .bill-title {
-                    text-align: center;
-                    font-weight: bold;
-                    text-decoration: underline;
-                    margin: 20px 0;
-                    font-size: 18px;
-                    text-transform: uppercase;
-                }
-
-                .invoice-details {
-                    width: 100%;
-                    text-align: right;
-                    margin-bottom: 20px;
-                    font-weight: bold;
-                    font-size: 14px;
-                }
-
-                .recipient-section {
-                    margin-bottom: 30px;
-                    font-size: 14px;
-                }
-                .recipient-label {
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                }
-
-                .subject-line {
-                    font-weight: bold;
-                    margin-bottom: 15px;
-                    font-size: 14px;
-                }
-
-                .items-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 20px;
-                    font-size: 14px;
-                }
-                .items-table th {
-                    background-color: #FFFF00; /* Yellow header from image */
-                    border: 1px solid #000;
-                    padding: 5px;
-                    text-align: center;
-                    font-weight: bold;
-                }
-                .items-table td {
-                    border: 1px solid #000;
-                    padding: 8px;
-                    text-align: center;
-                }
-                .items-table td.desc {
-                    text-align: left;
-                    padding-left: 10px;
-                }
-                .total-row td {
-                    font-weight: bold;
-                }
-
-                .footer-sign {
-                    margin-top: 50px;
-                    font-size: 14px;
-                }
-                .footer-sign p {
-                    margin: 2px 0;
-                }
+                .header-top-bar { height: 10px; background-color: #8B6914; margin-bottom: 20px; }
+                .header-logo-section { display: table; width: 100%; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+                .logo-col { display: table-cell; width: 30%; vertical-align: top; text-align: left; }
+                .logo-text { font-size: 24px; font-weight: 900; color: #8B6914; letter-spacing: 1px; line-height: 1; }
+                .logo-subtext { font-size: 11px; text-transform: uppercase; color: #555; letter-spacing: 2px; }
                 
-                .footer-bar {
-                    height: 10px;
-                    background-color: #8B6914;
-                    margin-top: 40px;
-                    /* Using clip-path to mimic the slant if supported, otherwise just a bar */
-                }
-
+                .company-info-col { display: table-cell; width: 70%; vertical-align: top; text-align: right; font-size: 13px; }
+                .company-info-item { margin-bottom: 3px; display: block; }
+                .icon { color: #8B6914; margin-right: 5px; font-weight: bold; }
+                
+                .bill-title { text-align: center; font-weight: bold; text-decoration: underline; margin: 20px 0; font-size: 22px; text-transform: uppercase; }
+                
+                .metadata-table { width: 100%; margin-bottom: 25px; border-collapse: collapse; }
+                .metadata-table td { vertical-align: top; padding: 5px 0; }
+                .metadata-label { font-weight: bold; width: 120px; color: #444; }
+                
+                .section-header { background-color: #eee; padding: 8px 10px; font-weight: bold; border-left: 5px solid #8B6914; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; }
+                
+                .details-grid { display: table; width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+                .details-row { display: table-row; }
+                .details-cell { display: table-cell; width: 50%; padding: 5px; border-bottom: 1px solid #f0f0f0; }
+                .details-key { font-weight: bold; color: #555; display: inline-block; width: 120px; }
+                
+                .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; border: 1px solid #000; }
+                .items-table th { background-color: #FFFF00; border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; }
+                .items-table td { border: 1px solid #000; padding: 10px; text-align: center; }
+                .items-table td.desc { text-align: left; padding-left: 15px; }
+                .total-row td { font-weight: bold; background-color: #f9f9f9; font-size: 16px; }
+                
+                .footer-sign { margin-top: 60px; font-size: 14px; text-align: right; margin-right: 20px; }
+                .footer-bar { height: 10px; background-color: #8B6914; margin-top: 40px; }
+                
+                .print-tip { background-color: #e0f2fe; color: #0369a1; padding: 10px; text-align: center; font-size: 13px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #bae6fd; }
             </style>
         </head>
         <body>
             <div class="container">
-                <!-- Top Decorative Bar -->
+                <div class="no-print print-tip">
+                    🖨️ <strong>Tip:</strong> Click 'Print' and select 'Save as PDF' to download this receipt.
+                </div>
+                
                 <div class="header-top-bar"></div>
 
-                <!-- Header Section -->
                 <div class="header-logo-section">
                     <div class="logo-col">
-                        <!-- Ideally replace with hosted image URL -->
-                        <img src="https://peptides.co.in/assets/img/logo.png" alt="Peptides Logo" class="logo-img" style="min-height:50px; background:#f0f0f0;"> 
                         <div class="logo-text">PEPTIDES</div>
                         <div class="logo-subtext">KNOWLEDGE PARK</div>
                     </div>
@@ -306,30 +227,63 @@ const paymentReceiptTemplate = (paymentDetails) => {
                     </div>
                 </div>
 
-                <div class="bill-title">Cash Bill</div>
+                <div class="bill-title">PAYMENT RECEIPT</div>
 
-                <div class="invoice-details">
-                    <div>Date: ${date}</div>
-                    <div style="margin-top: 5px;">Invoice No: ${invoiceNo}</div>
+                <table class="metadata-table">
+                    <tr>
+                        <td style="width: 60%">
+                            <div class="section-header" style="margin-top:0;">billed to</div>
+                            <div style="font-size: 16px; font-weight: bold; margin-bottom: 4px;">${recipientName}</div>
+                            <div>${recipientAddress || ''}</div>
+                            <div>${record?.email || ''}</div>
+                            <div>${record?.phone || record?.mobile || ''}</div>
+                        </td>
+                        <td style="width: 40%; text-align: right;">
+                             <div class="section-header" style="text-align: right; border-left: none; border-right: 5px solid #8B6914;">Receipt Details</div>
+                             <table style="width: 100%; text-align: right;">
+                                <tr>
+                                    <td class="metadata-label">Invoice No:</td>
+                                    <td><strong>${invoiceNo}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="metadata-label">Date:</td>
+                                    <td>${date}</td>
+                                </tr>
+                                <tr>
+                                    <td class="metadata-label">Payment ID:</td>
+                                    <td style="font-family: monospace;">${paymentId}</td>
+                                </tr>
+                             </table>
+                        </td>
+                    </tr>
+                </table>
+
+                ${record ? `
+                <div class="section-header">Candidate Details</div>
+                <div class="details-grid">
+                    <div class="details-row">
+                        <div class="details-cell"><span class="details-key">College/Org:</span> ${getField(record.college || record.organization || record.university)}</div>
+                        <div class="details-cell"><span class="details-key">Course/Dept:</span> ${getField(record.course || record.department || record.profession)}</div>
+                    </div>
+                    <div class="details-row">
+                         <div class="details-cell"><span class="details-key">Gender:</span> ${getField(record.gender)}</div>
+                         <div class="details-cell"><span class="details-key">State:</span> ${getField(record.state)}</div>
+                    </div>
+                     <div class="details-row">
+                         <div class="details-cell"><span class="details-key">Service:</span> ${getField(record.services)}</div>
+                         <div class="details-cell"><span class="details-key">Source:</span> ${getField(record.source)}</div>
+                    </div>
                 </div>
+                ` : ''}
 
-                <div class="recipient-section">
-                    <div class="recipient-label">To,</div>
-                    <div style="margin-left: 0px; font-weight: bold;">${recipientName},</div>
-                    <div style="margin-left: 0px;">${recipientAddress || ''}</div>
-                </div>
-
-                <div class="subject-line">
-                    Sub: Bill for ${itemDescription}
-                </div>
-
+                <div class="section-header">Payment Details</div>
                 <table class="items-table">
                     <thead>
                         <tr>
-                            <th style="width: 10%;">S.No</th>
-                            <th style="width: 50%;">Items</th>
-                            <th style="width: 20%;">Qty</th>
-                            <th style="width: 20%;">Price (INR)</th>
+                            <th style="width: 10%;">#</th>
+                            <th style="width: 60%;">Description</th>
+                            <th style="width: 10%;">Qty</th>
+                            <th style="width: 20%;">Amount (INR)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -339,24 +293,23 @@ const paymentReceiptTemplate = (paymentDetails) => {
                             <td>1</td>
                             <td>${amount}/-</td>
                         </tr>
-                        <!-- Empty rows to match the look if desired, or simplified -->
                         <tr class="total-row">
-                            <td colspan="3" style="text-align: right; padding-right: 15px;">Total</td>
-                            <td>${amount}/-</td>
+                            <td colspan="3" style="text-align: right; padding-right: 15px;">TOTAL AMOUNT PAID</td>
+                            <td>₹${amount}/-</td>
                         </tr>
                     </tbody>
                 </table>
 
-                 <div style="text-align: right; margin-bottom: 20px;">
-                    <strong>Reference ID:</strong> ${paymentId}
-                 </div>
-
                 <div class="footer-sign">
-                    <p style="font-weight: bold;">Dr. Suya Sarva</p>
-                    <p>COO | Helix Synergy Corp</p>
+                    <img src="" alt="" style="height: 40px; display: block; margin-left: auto; margin-bottom: 5px;"> <!-- Placeholder for signature if needed -->
+                    <p style="font-weight: bold; font-size: 16px;">Dr. Suya Sarva</p>
+                    <p style="color: #666;">COO | Helix Synergy Corp</p>
                 </div>
 
                 <div class="footer-bar"></div>
+                <div style="text-align: center; font-size: 10px; color: #888; margin-top: 10px;">
+                    This is a computer-generated receipt and does not require a physical signature.
+                </div>
             </div>
         </body>
         </html>

@@ -84,7 +84,7 @@ const { paymentReceiptTemplate } = require('../utils/emailTemplates'); // Import
 // 4. Create Payment Link (Admin initiated)
 router.post('/create-payment-link', async (req, res) => {
     try {
-        const { type, formData, amount } = req.body; // type: 'student' or 'faculty'
+        const { type, formData, amount, source } = req.body; // type: 'student' or 'faculty'
 
         if (!amount || !formData || !formData.email) {
             return res.status(400).json({ message: 'Missing required fields' });
@@ -97,7 +97,7 @@ router.post('/create-payment-link', async (req, res) => {
             ...formData,
             amount,
             payment_status: 'PendingLink',
-            source: 'Admin Panel'
+            source: source || 'Peptides'
         });
         await newRecord.save();
 
@@ -309,7 +309,8 @@ router.post('/webhook', async (req, res) => {
                         recipientAddress: record.address || '',
                         itemDescription: `Registration Fee for ${type}`,
                         amount: record.amount,
-                        paymentId: payload.payment?.entity?.id || linkId // Try to get actual payment ID if available in payload
+                        paymentId: payload.payment?.entity?.id || linkId, // Try to get actual payment ID if available in payload
+                        record: record
                     };
 
                     const emailContent = paymentReceiptTemplate(receiptData);
