@@ -47,8 +47,9 @@ router.post('/', upload.none(), async (req, res) => {
         await contact.save();
         console.log("✅ Contact saved to DB:", contact._id);
 
+        /* 
+        // 2. Send emails (DISABLED per admin request)
         try {
-            // 2. Send emails (SECONDARY)
             const userSubject = `Thank You for Your Inquiry!`;
             const userHtml = confirmationTemplate(fullName, formName);
             await sendEmail(formData.email, userSubject, userHtml);
@@ -59,7 +60,8 @@ router.post('/', upload.none(), async (req, res) => {
         } catch (emailError) {
             console.error("⚠️ Email failed but data saved:", emailError.message);
             // We still return success because data is safe
-        }
+        } 
+        */
 
         res.status(200).json({ success: true, message: 'Message sent successfully!' });
     } catch (error) {

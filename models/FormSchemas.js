@@ -36,7 +36,11 @@ const StudentSchema = new mongoose.Schema({
     howYouKnowAboutUs: String,
     comment: String,
 
-    paymentScreenshot: String, // Path to file
+    paymentScreenshot: { type: String, required: false }, // Made optional
+    razorpay_order_id: String,
+    razorpay_payment_id: String,
+    payment_status: { type: String, default: 'Pending' },
+    amount: Number,
     source: { type: String, default: 'Peptides' },
     createdAt: { type: Date, default: Date.now }
 });
@@ -61,7 +65,11 @@ const FacultySchema = new mongoose.Schema({
     howYouKnowAboutUs: String,
     comment: String,
 
-    paymentScreenshot: String, // Path to file
+    paymentScreenshot: { type: String, required: false }, // Made optional
+    razorpay_order_id: String,
+    razorpay_payment_id: String,
+    payment_status: { type: String, default: 'Pending' },
+    amount: Number,
     source: { type: String, default: 'Peptides' },
     createdAt: { type: Date, default: Date.now }
 });
