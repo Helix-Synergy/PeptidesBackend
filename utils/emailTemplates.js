@@ -220,9 +220,9 @@ const paymentReceiptTemplate = (paymentDetails) => {
                          <div class="company-info-item"><span class="icon">&#9993;</span> hello@peptides.co.in</div>
                          <div class="company-info-item"><span class="icon">&#127760;</span> www.peptides.co.in</div>
                          <div class="company-info-item" style="margin-top: 5px;">
-                            <span class="icon">&#128205;</span> 402, 4th Floor Manjeera<br>
-                            Trinity Corporate, KPHB<br>
-                            Hyderabad - 500072
+                            <span class="icon">&#128205;</span> Mahaveer Radiance, opp. Madhapur<br>
+                            Police Station, Madhapur<br>
+                            Hyderabad - 500081
                          </div>
                     </div>
                 </div>
